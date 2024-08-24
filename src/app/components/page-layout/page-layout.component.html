@@ -1,0 +1,14 @@
+ <tt-header></tt-header>
+<!-- content -->
+<main class="tt-pl">
+  <mat-drawer-container>
+    <mat-drawer class="tt-pl-sb" mode="side" [opened]="visileMenu()">Sidenav content</mat-drawer>
+    <mat-drawer-content class="tt-pl-ct">
+      <ng-content select="[content]"></ng-content>
+    </mat-drawer-content>
+  </mat-drawer-container>
+</main>
+
+<div class="tt-pl-hidden">
+  <ng-content select="[hidden]"></ng-content>
+</div>

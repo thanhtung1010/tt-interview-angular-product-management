@@ -1,0 +1,92 @@
+{
+  "root": true,
+  "ignorePatterns": [
+    "projects/**/*"
+  ],
+  "overrides": [
+    {
+      "files": [
+        "*.ts"
+      ],
+      "parserOptions": {
+        "project": [
+          "tsconfig.json"
+        ],
+        "createDefaultProgram": true
+      },
+      "extends": [
+        "plugin:@angular-eslint/recommended",
+        "plugin:@angular-eslint/template/process-inline-templates"
+      ],
+      "rules": {
+        "@angular-eslint/directive-selector": [
+          "error",
+          {
+            "type": "attribute",
+            "prefix": "tt",
+            "style": "kebab-case"
+          }
+        ],
+        "@angular-eslint/component-selector": [
+          "error",
+          {
+            "type": "element",
+            "prefix": "tt",
+            "style": "kebab-case"
+          }
+        ],
+        "@angular-eslint/pipe-prefix": [
+          "error",
+          {
+            "prefixes": ["TT"]
+          }
+        ],
+        "@angular-eslint/no-empty-lifecycle-method": "off",
+        "max-len": [
+          "error",
+          {
+            "code": 160,
+            "tabWidth": 2
+          }
+        ]
+      }
+    },
+    {
+      "files": [
+        "*.html"
+      ],
+      "extends": [
+        "plugin:@angular-eslint/template/recommended"
+      ],
+      "rules": {
+        // "max-len": [
+        //   "error",
+        //   {
+        //     "code": 200,
+        //     "tabWidth": 2
+        //   }
+        // ]
+      }
+    },
+    {
+      "files": [
+        "*.js"
+      ],
+      "parserOptions": {
+        "ecmaVersion": "latest"
+      },
+      "env": {
+        "es6": true
+      },
+      "rules": {
+        "max-len": [
+          "error",
+          {
+            "code": 160,
+            "tabWidth": 2
+          }
+        ]
+      }
+    }
+  ]
+}

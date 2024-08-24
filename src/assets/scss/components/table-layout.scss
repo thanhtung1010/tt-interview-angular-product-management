@@ -1,0 +1,27 @@
+&-tl {
+  &-ft {
+    @apply
+      flex
+      justify-between
+      gap-[10px]
+      p-[5px]
+  }
+
+  &-flr {
+    @apply
+      flex
+      min-w-[300px]
+      basis-[10%]
+      justify-between
+      items-end
+  }
+
+  &-fll {
+    @apply
+      flex
+      flex-wrap
+      gap-[5px]
+      basis-[90%]
+      h-[500px]
+  }
+}

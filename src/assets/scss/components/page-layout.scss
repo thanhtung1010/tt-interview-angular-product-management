@@ -1,0 +1,31 @@
+&-pl {
+
+  &-sb {
+    background-color: $whiteColor !important;
+    border: unset !important;
+    border-radius: 8px !important;
+    width: $sideBarWidth !important;
+    @apply
+      h-[100%]
+  }
+
+  &-ct {
+    margin-left: calc($sideBarWidth + 8px) !important;
+    @apply
+      bg-[var(--white-color)]
+      rounded-[8px]
+      h-[100%]
+  }
+
+  &-hidden {
+    display: none;
+  }
+
+  .mat-drawer-container {
+    height: 100% !important;
+  }
+
+  @apply
+    p-2
+    h-[calc(100vh-50px)]
+}

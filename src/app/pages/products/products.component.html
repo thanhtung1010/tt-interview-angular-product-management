@@ -1,0 +1,9 @@
+<tt-table-layout>
+  <ng-container filter-right>
+    <button mat-icon-button aria-label="Example icon-button with menu icon" (click)="onToggleAddProduct()">
+      <mat-icon aria-hidden="false" aria-label="Add Circle" fontIcon="add_circle"></mat-icon>
+    </button>
+  </ng-container>
+</tt-table-layout>
+
+<tt-add-product [(visible)]="visibleAddProduct"></tt-add-product>
