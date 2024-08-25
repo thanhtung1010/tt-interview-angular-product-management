@@ -1,0 +1,15 @@
+.tt-tl {
+  .mdc-icon-button {
+    padding: 8px !important;
+  }
+
+  .tt-tl-pag {
+    .mat-mdc-paginator-container {
+      justify-content: flex-start !important;
+    }
+  }
+}
+
+.mat-mdc-header-cell {
+  min-width: var(--mat-mdc-header-cell) !important;
+}

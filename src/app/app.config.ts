@@ -3,13 +3,14 @@ import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { BrowserModule } from '@angular/platform-browser';
-import { MenuSerice } from '@services';
-import { MatDialogModule } from '@angular/material/dialog';
+import { FirebaseService, GoogleService, MenuService } from '@services';
 
 const _providers: Array<ImportProvidersSource> = [
   BrowserModule,
   BrowserAnimationsModule,
-  MenuSerice,
+  MenuService,
+  FirebaseService,
+  GoogleService,
 ];
 
 export const appConfig: ApplicationConfig = {

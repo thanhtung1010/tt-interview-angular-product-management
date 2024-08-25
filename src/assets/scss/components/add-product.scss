@@ -1,0 +1,16 @@
+&-ap {
+
+  &-form {
+    @apply
+      flex
+      flex-wrap
+      gap-[5px]
+      max-w-[500px]
+      w-[100%]
+  }
+
+  &-fi {
+    @apply
+      flex-[50%]
+  }
+}

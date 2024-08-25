@@ -1,15 +1,77 @@
 <h2 mat-dialog-title>Add Product</h2>
-<mat-dialog-content>
-  <!-- <form [formGroup]="productForm">
-    <ng-container *ngIf="productForm.contains('name')"> -->
-      <mat-form-field>
-        <mat-label>Product Nme</mat-label>
-        <input matInput />
+<mat-dialog-content class="relative ">
+  <form class="tt-ap-form" [formGroup]="productForm">
+    <!-- region name -->
+    <ng-container *ngIf="productForm.contains('name')">
+      <mat-form-field class="tt-ap-fi">
+        <mat-label>Product Name</mat-label>
+        <input matInput formControlName="name" />
       </mat-form-field>
-    <!-- </ng-container>
-  </form> -->
+    </ng-container>
+
+    <!-- region category -->
+    <ng-container *ngIf="productForm.contains('category')">
+      <mat-form-field class="tt-ap-fi">
+        <mat-label>Product Category</mat-label>
+        <mat-select formControlName="category" (ngModelChange)="onChangeCategory($event)">
+          <ng-container *ngFor="let category of categorys">
+            <mat-option [value]="category.code">{{category.label}}</mat-option>
+          </ng-container>
+        </mat-select>
+      </mat-form-field>
+    </ng-container>
+
+    <!-- region type -->
+    <ng-container *ngIf="productForm.contains('type')">
+      <mat-form-field class="tt-ap-fi" [ngClass]="{'tt-disabled': !productForm.controls['category'].value}">
+        <mat-label>Product Type</mat-label>
+        <mat-select formControlName="type">
+          <ng-container *ngFor="let type of typesForSelect">
+            <mat-option [value]="type.code">{{type.label}}</mat-option>
+          </ng-container>
+        </mat-select>
+      </mat-form-field>
+    </ng-container>
+
+    <!-- region price -->
+    <ng-container *ngIf="productForm.contains('price')">
+      <mat-form-field class="tt-ap-fi">
+        <mat-label>Product Price (VND)</mat-label>
+        <input class="tt-input-currency" matInput formControlName="price" tt-currency-format />
+      </mat-form-field>
+    </ng-container>
+
+    <!-- region detail -->
+    <ng-container *ngIf="productForm.contains('detail')">
+      <mat-form-field class="tt-ap-fi">
+        <mat-label>Product Detail</mat-label>
+        <textarea matInput formControlName="detail"></textarea>
+      </mat-form-field>
+    </ng-container>
+
+    <!-- region img -->
+    <ng-container *ngIf="productForm.contains('img')">
+      <mat-form-field class="tt-ap-fi">
+        <mat-label>Product Image</mat-label>
+        <input matInput formControlName="img" />
+      </mat-form-field>
+      <ng-container *ngIf="productForm.controls['img'].value">
+        <div class="w-[100%] flex justify-center items-center">
+          <img class="w-[100%] !max-w-[400px]" [src]="productForm.controls['img'].value" alt="img">
+        </div>
+      </ng-container>
+    </ng-container>
+  </form>
+
+  <ng-container *ngIf="!isReadyFormData()">
+    <div class="tt-tl-ld">
+      <div class="tt-tl-bgld">
+      </div>
+      <mat-progress-bar mode="query"></mat-progress-bar>
+    </div>
+  </ng-container>
 </mat-dialog-content>
-<mat-dialog-actions>
-  <button mat-button>No Thanks</button>
-  <button mat-button cdkFocusInitial>Ok</button>
+<mat-dialog-actions [align]="'end'">
+  <button mat-button (click)="onCloseDialog()">Cancel</button>
+  <button [disabled]="productForm.invalid" mat-button cdkFocusInitial (click)="submit()">Ok</button>
 </mat-dialog-actions>

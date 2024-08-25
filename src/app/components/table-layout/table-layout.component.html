@@ -1,37 +1,38 @@
-<section class="tt-tl-ft">
-  <section class="tt-tl-ftl">
-    <ng-content select="[filter]"></ng-content>
+<section class="tt-tl">
+  <!-- region table filter -->
+  <section class="tt-tl-ft" [ngClass]="{'tt-disabled': loading()}">
+    <section class="tt-tl-ftl">
+      <ng-content select="[filter]"></ng-content>
+    </section>
+    <section class="tt-tl-ftr">
+      <ng-container *ngIf="tableSetting?.showSearch ?? true">
+        <button mat-icon-button class="favorite-icon" aria-label="Example icon-button with heart icon">
+          <mat-icon aria-hidden="false" aria-label="Search" fontIcon="search"></mat-icon>
+        </button>
+      </ng-container>
+      <ng-content select="[filter-right]"></ng-content>
+    </section>
   </section>
-  <section class="tt-tl-ftr">
-    <ng-content select="[filter-right]"></ng-content>
+  <!-- region table -->
+  <section class="tt-tl-tb" [style]="'overflow: ' + tbStyleLoading() + ';'">
+    <ng-content select="[table]"></ng-content>
+    <ng-container *ngIf="loading()" [ngTemplateOutlet]="loadingTemp"></ng-container>
+  </section>
+  <!-- region bottom table -->
+   <section class="tt-tl-fo">
+    <div class="tt-tl-pag">
+      <ng-content select="[pagination]"></ng-content>
+    </div>
+    <div class="tt-tl-brfo">
+      <ng-content select="[button-right-ft]"></ng-content>
+    </div>
   </section>
 </section>
-<table mat-table [dataSource]="ELEMENT_DATA" class="mat-elevation-z8">
 
-  <!-- Position Column -->
-  <ng-container matColumnDef="position">
-    <th mat-header-cell *matHeaderCellDef> No. </th>
-    <td mat-cell *matCellDef="let element"> {{element.position}} </td>
-  </ng-container>
-
-  <!-- Name Column -->
-  <ng-container matColumnDef="name">
-    <th mat-header-cell *matHeaderCellDef> Name </th>
-    <td mat-cell *matCellDef="let element"> {{element.name}} </td>
-  </ng-container>
-
-  <!-- Weight Column -->
-  <ng-container matColumnDef="weight">
-    <th mat-header-cell *matHeaderCellDef> Weight </th>
-    <td mat-cell *matCellDef="let element"> {{element.weight}} </td>
-  </ng-container>
-
-  <!-- Symbol Column -->
-  <ng-container matColumnDef="symbol">
-    <th mat-header-cell *matHeaderCellDef> Symbol </th>
-    <td mat-cell *matCellDef="let element"> {{element.symbol}} </td>
-  </ng-container>
-
-  <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-  <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-</table>
+<ng-template #loadingTemp>
+  <div class="tt-tl-ld">
+    <div class="tt-tl-bgld">
+    </div>
+    <mat-progress-bar mode="query"></mat-progress-bar>
+  </div>
+</ng-template>

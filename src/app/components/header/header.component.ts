@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { MenuSerice } from '@services';
+import { MenuService } from '@services';
 
 @Component({
   standalone: true,
@@ -16,7 +16,7 @@ import { MenuSerice } from '@services';
 })
 export class HeaderComponent implements OnInit {
 
-  constructor(private menuService: MenuSerice) { }
+  constructor(private menuService: MenuService) { }
 
   ngOnInit() {
   }

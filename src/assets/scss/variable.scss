@@ -27,6 +27,7 @@ $mediumFontSize: 16px;
 $smallFontSize: 8px;
 
 $sideBarWidth: 200px;
+$headerHeight: 70px;
 
 :root {
   --scroll-bar-color: #8ce6c8;
@@ -56,5 +57,7 @@ $sideBarWidth: 200px;
   --medium-font-size: 16px;
   --small-font-size: 8px;
 
-  --side-bar-width: 200px
+  --side-bar-width: 200px;
+  --header-height: 70px;
+  --mdc-filled-button-container-color: #ED0008;
 }

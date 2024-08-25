@@ -10,7 +10,6 @@
   }
 
   &-ct {
-    margin-left: calc($sideBarWidth + 8px) !important;
     @apply
       bg-[var(--white-color)]
       rounded-[8px]
@@ -27,5 +26,5 @@
 
   @apply
     p-2
-    h-[calc(100vh-50px)]
+    h-[calc(100vh-var(--header-height))]
 }

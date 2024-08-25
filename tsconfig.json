@@ -39,6 +39,15 @@
       "@interfaces": [
         "./src/app/interfaces"
       ],
+      "@pipes": [
+        "./src/app/pipes"
+      ],
+      "@directives": [
+        "./src/app/directives"
+      ],
+      "~environments/*": [
+        "./src/environments/*"
+      ],
     }
   },
   "angularCompilerOptions": {

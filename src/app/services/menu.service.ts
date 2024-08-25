@@ -4,8 +4,8 @@ import { BehaviorSubject } from "rxjs";
 @Injectable({
   providedIn: 'root'
 })
-export class MenuSerice {
-  visible$: BehaviorSubject<boolean> = new BehaviorSubject(true);
+export class MenuService {
+  visible$: BehaviorSubject<boolean> = new BehaviorSubject(false);
   constructor() {}
 
   get visible(): boolean {

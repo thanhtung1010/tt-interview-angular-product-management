@@ -7,21 +7,73 @@
       p-[5px]
   }
 
-  &-flr {
+  &-ftr {
     @apply
       flex
       min-w-[300px]
       basis-[10%]
-      justify-between
+      justify-end
       items-end
   }
 
-  &-fll {
+  &-ftl {
     @apply
       flex
       flex-wrap
       gap-[5px]
       basis-[90%]
-      h-[500px]
   }
+
+  &-fo {
+    padding: 0 8px;
+    @apply
+      flex
+      justify-between
+      absolute
+      bottom-[8px]
+      w-[100%]
+  }
+
+  &-brfo {
+    @apply
+      flex
+      justify-center
+      items-center
+  }
+
+  &-tb {
+    @apply
+      overflow-auto
+      min-h-[50%]
+      relative
+  }
+
+  &-ld {
+    .mat-mdc-progress-bar {
+      transform: translate(-50%, 0) scaleX(-1) !important;
+    }
+
+    @apply
+      absolute
+      top-0
+      left-0
+      h-[100%]
+      w-[100%]
+      z-[inherit]
+      flex
+      justify-center
+      items-center
+  }
+
+  &-bgld {
+    @apply
+      h-[100%]
+      w-[100%]
+      bg-[var(--white-color)]
+      opacity-35
+  }
+
+  @apply
+    h-[100%]
+    relative
 }

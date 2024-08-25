@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { PageLayoutComponent } from '@components';
+import { FirebaseService } from '@services';
 
 @Component({
   selector: 'tt-root',
@@ -11,6 +12,11 @@ import { PageLayoutComponent } from '@components';
   ],
   templateUrl: './app.component.html',
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
+  constructor(private firebaseService: FirebaseService) {}
+
+  ngOnInit(): void {
+    this.firebaseService.init();
+  }
 
 }

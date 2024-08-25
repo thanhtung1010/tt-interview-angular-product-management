@@ -1,12 +1,39 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  Component,
+  computed,
+  ElementRef,
+  EventEmitter,
+  Inject,
+  Input,
+  OnInit,
+  Output,
+  signal,
+  ViewChild
+} from '@angular/core';
+import {
+  FormBuilder,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDialogTitle, MatDialogContent, MatDialogContainer, MatDialogActions, MatDialogClose, MatDialog, MatDialogRef } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA,
+  MatDialogActions,
+  MatDialogClose,
+  MatDialogContent,
+  MatDialogTitle
+} from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { FORM_DEFAULT_VALUE } from '@enums';
-import { IAddProduct, IProduct } from '@interfaces';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatSelectModule } from '@angular/material/select';
+import { CurrencyFormatDirective } from '@directives';
+import { FIRESTORE_COLLECTION, FORM_DEFAULT_VALUE, PRODUCT_CATEGORY } from '@enums';
+import { IAddProduct, IProduct, ICategory, IProductFromFirebase, IType, IGroupTypeByCategory } from '@interfaces';
+import { FirebaseService } from '@services';
 
 @Component({
   standalone: true,
@@ -16,6 +43,7 @@ import { IAddProduct, IProduct } from '@interfaces';
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
+    CurrencyFormatDirective,
     MatDialogTitle,
     MatDialogContent,
     MatDialogActions,
@@ -23,34 +51,78 @@ import { IAddProduct, IProduct } from '@interfaces';
     MatButtonModule,
     MatFormFieldModule,
     MatInputModule,
+    MatSelectModule,
+    MatProgressBarModule,
   ]
 })
-export class AddProductComponent implements OnInit, OnChanges {
+export class AddProductComponent implements OnInit {
   @ViewChild('modal') modalElementRef!: ElementRef;
-  @Input() product?: IProduct;
+  @Output() formValueChange = new EventEmitter();
+  @Output() closeDialog = new EventEmitter();
 
-  @Input() visible: boolean = false;
-  @Output() visibleChange: EventEmitter<boolean> = new EventEmitter();
-
+  loading = {
+    initForm: signal(false),
+    getCategory: signal(false),
+    getType: signal(false),
+  };
+  isReadyFormData = computed(() => {
+    return this.loading.initForm() && this.loading.getCategory() && this.loading.getType();
+  });
   productForm!: FormGroup<IAddProduct>;
-  dialogRef!: MatDialogRef<AddProductComponent>;
+  categorys: Array<ICategory> = [];
+  types: Array<IGroupTypeByCategory> = [];
+  typesForSelect: Array<IType> = [];
 
   constructor(
+    @Inject(MAT_DIALOG_DATA) private data: any,
     private fb: FormBuilder,
-    private dialogService: MatDialog,
+    private firebaseService: FirebaseService,
   ) { }
 
-  //#region life cycle
   ngOnInit() {
     this.initForm();
+    this.initData();
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['visible']) {
-      this.onToggleVisibleAddProduct(this.visible);
-    }
+  initData() {
+    this.getProductCatrgory();
+    this.getProductType();
   }
-  //#endregion
+
+  getProductCatrgory() {
+    this.firebaseService.getCollection<ICategory>(FIRESTORE_COLLECTION.CATEGORYS, false).subscribe(resp => {
+      this.categorys = resp;
+      this.loading.getCategory.set(true);
+    });
+  }
+
+  getProductType() {
+    this.firebaseService.getCollection<IType>(FIRESTORE_COLLECTION.TYPES, false).subscribe(resp => {
+      this.types = this.cookingTypeByCategory(resp);
+      this.loading.getType.set(true);
+    });
+  }
+
+  onChangeCategory(category: PRODUCT_CATEGORY) {
+    this.typesForSelect = this.types.find(type => type.category === category)?.types ?? [];
+  }
+
+  cookingTypeByCategory(data: Array<IType>): Array<IGroupTypeByCategory> {
+    const returnData: Array<IGroupTypeByCategory> = [];
+
+    data.forEach(prod => {
+      const existIndex = returnData.findIndex(retProd => retProd.category === prod.category);
+      if (existIndex > -1) {
+        returnData[existIndex].types.push(prod);
+      } else {
+        returnData.push({
+          category: prod.category,
+          types: [prod],
+        })
+      }
+    });
+    return returnData;
+  }
 
   initForm() {
     this.productForm = this.fb.group({
@@ -62,19 +134,35 @@ export class AddProductComponent implements OnInit, OnChanges {
       img: [FORM_DEFAULT_VALUE.STRING, []],
     });
 
-    if (this.product) {
-      this.productForm.patchValue(this.product);
+    if (this.data?.product) {
+      this.productForm.patchValue(this.data.product);
+    }
+    this.loading.initForm.set(true);
+  }
+
+  submit() {
+    const valid = this.productForm.valid;
+    if (!valid) {
+      const controls: Record<string, any> = this.productForm.controls;
+
+      for (const field in controls) {
+        controls[field]?.markAsDirty();
+        controls[field]?.updateValueAndValidity();
+      }
+    } else {
+      let value: Record<string, any> = this.productForm.value;
+      if (this.data?.product) {
+        value = {
+          ...this.data.product,
+          ...value,
+        };
+      }
+      this.formValueChange.emit(value);
     }
   }
 
-  onToggleVisibleAddProduct(visible: boolean) {
-    if (visible) {
-      this.dialogRef = this.dialogService.open(AddProductComponent);
-    } else {
-      this.dialogRef?.close();
-    }
-    this.visible = visible;
-    this.visibleChange.emit(this.visible);
+  onCloseDialog() {
+    this.closeDialog.emit();
   }
 
 }

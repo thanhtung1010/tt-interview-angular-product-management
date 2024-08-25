@@ -1,5 +1,6 @@
 import { FormControl } from "@angular/forms";
 import { PRODUCT_CATEGORY, PRODUCT_TYPE } from "@enums";
+import { IBaseItemFromFirebase } from "./firebase.interface";
 
 export interface IProduct {
   id: string;
@@ -11,9 +12,26 @@ export interface IProduct {
   img?: string;
 }
 
-export interface IProductType {
+export interface IProductFromFirebase extends IProduct, IBaseItemFromFirebase {
+  select?: boolean;
+}
+
+export interface ICategory {
+  id: string;
+  code: PRODUCT_CATEGORY;
+  label: string;
+}
+
+export interface IType {
+  id: string;
   category: PRODUCT_CATEGORY;
-  types: Array<PRODUCT_TYPE>;
+  code: PRODUCT_TYPE,
+  label: string;
+}
+
+export interface IGroupTypeByCategory {
+  category: PRODUCT_CATEGORY;
+  types: Array<IType>;
 }
 
 export interface IAddProduct {
@@ -24,3 +42,5 @@ export interface IAddProduct {
   detail: FormControl<string | null>;
   img: FormControl<string | null>;
 }
+
+export type PRODUCT_FIELD =  'name' | 'category' | 'type' | 'price' | 'detail' | 'img' | 'createdAt' | 'updatedAt' | 'select' | 'action';
