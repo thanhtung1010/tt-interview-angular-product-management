@@ -5,7 +5,6 @@ import { Directive, ElementRef, HostListener, Input } from '@angular/core';
   selector: '[tt-currency-format]'
 })
 export class CurrencyFormatDirective {
-  @Input() currencyFormat: string = '$0.00'; // Default format
 
   constructor(private el: ElementRef) {}
 
@@ -52,11 +51,11 @@ export class CurrencyFormatDirective {
     }
   }
 
-  formatNumber(value: number): string {
+  private formatNumber(value: number): string {
     return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")
   }
 
-  formatString(value: string): number {
+  private formatString(value: string): number {
     return +(value.replace(/[^\d]/g, ''));
   }
 }

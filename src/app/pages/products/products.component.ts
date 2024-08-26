@@ -114,7 +114,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
     },
     {
       field: 'price',
-      title: 'Price',
+      title: 'Price (VND)',
       width: '120',
       showSort: false,
       sortOrder: null,
@@ -489,7 +489,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
   //#region sort
   onClickSortHeader(index: number, header: ITableElement<PRODUCT_FIELD>) {
     if (header.sortOrder === null) {
-      this.tableHeaders = this.tableHeaders.map((head, _index) => {
+      this.tableHeaders = this.tableHeaders.map((head) => {
         if (head.field === DEFAULT_SORT_FIELD) {
           head.sortOrder = 'asc';
         } else {

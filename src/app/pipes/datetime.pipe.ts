@@ -3,7 +3,7 @@ import { environment } from "~environments/environment";
 import { format } from 'date-fns';
 
 @Pipe({
-  name: 'DateTimePipe',
+  name: 'TTDateTimePipe',
   standalone: true,
 })
 export class DateTimePipe implements PipeTransform {

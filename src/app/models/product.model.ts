@@ -47,10 +47,10 @@ export class ProductModel {
   }
 
   get getURLParams(): Record<string, any> {
-    return this.removeEmptyValues({...this}, 'number');
+    return this.removeEmptyValues({...this});
   }
 
-  private removeEmptyValues(obj: Record<string, any>, typeCompareValue: string = 'undefined'): any {
+  private removeEmptyValues(obj: Record<string, any>): any {
     if (typeof obj !== 'object' || obj === null) {
       return obj; // Return non-object values as is
     }

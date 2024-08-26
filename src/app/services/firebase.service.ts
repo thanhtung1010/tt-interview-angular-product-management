@@ -1,5 +1,7 @@
 import { Injectable } from "@angular/core";
+import { UNFILTER_FIELD } from "@enums";
 import { IBaseItemFromFirebase, ISearchDocumentWithField } from "@interfaces";
+import { getTime } from 'date-fns';
 import { FirebaseApp, initializeApp } from "firebase/app";
 import {
   Auth,
@@ -11,25 +13,18 @@ import {
 import {
   addDoc,
   collection,
-  count,
-  deleteDoc,
   doc,
   Firestore,
   getDoc,
   getDocs,
   getFirestore,
-  limit,
   orderBy,
   query,
-  startAfter,
-  startAt,
   updateDoc,
   where
 } from 'firebase/firestore';
 import { forkJoin, from, Observable, Subscriber } from "rxjs";
 import { environment } from "~environments/environment";
-import { getTime } from 'date-fns';
-import { DEFAULT_SORT_FIELD, PAGINATION_FIELD, UNFILTER_FIELD } from "@enums";
 
 @Injectable({
   providedIn: 'root'

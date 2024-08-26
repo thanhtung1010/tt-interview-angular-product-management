@@ -30,9 +30,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSelectModule } from '@angular/material/select';
 import { CurrencyFormatDirective } from '@directives';
-import { FIRESTORE_COLLECTION, FORM_DEFAULT_VALUE, PRODUCT_CATEGORY } from '@enums';
+import { FORM_DEFAULT_VALUE, PRODUCT_CATEGORY } from '@enums';
 import { IAddProduct, ICategory, IGroupTypeByCategory, IType } from '@interfaces';
-import { FirebaseService } from '@services';
 
 @Component({
   standalone: true,
@@ -135,6 +134,7 @@ export class AddProductComponent implements OnInit {
         value = {
           ...this.data.product,
           ...value,
+          price: this.formatCurrency(value['price'])
         };
       }
       this.formValueChange.emit(value);
@@ -143,6 +143,21 @@ export class AddProductComponent implements OnInit {
 
   onCloseDialog() {
     this.closeDialog.emit();
+  }
+
+  private formatCurrency(value: string): string {
+    let inputValue = value;
+    let numberValue = this.formatString(inputValue);
+
+    return this.formatNumber(numberValue);;
+  }
+
+  private formatNumber(value: number): string {
+    return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+  }
+
+  private formatString(value: string): number {
+    return +(value.replace(/[^\d]/g, ''));
   }
 
 }

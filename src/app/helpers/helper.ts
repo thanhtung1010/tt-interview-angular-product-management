@@ -27,7 +27,7 @@ export class Helpers {
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
-    var scrollStep = -window.scrollY / (300 / 100),
+    let scrollStep = -window.scrollY / (300 / 100),
       scrollInterval = setInterval(function () {
         if (window.scrollY != 0) {
           window.scrollBy(0, scrollStep);
