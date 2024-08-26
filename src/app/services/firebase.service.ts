@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { IBaseItemFromFirebase, IFirestoreSearchDocument } from "@interfaces";
+import { IBaseItemFromFirebase, ISearchDocumentWithField } from "@interfaces";
 import { FirebaseApp, initializeApp } from "firebase/app";
 import {
   Auth,
@@ -11,19 +11,25 @@ import {
 import {
   addDoc,
   collection,
+  count,
   deleteDoc,
   doc,
   Firestore,
   getDoc,
   getDocs,
   getFirestore,
+  limit,
+  orderBy,
   query,
+  startAfter,
+  startAt,
   updateDoc,
   where
 } from 'firebase/firestore';
 import { forkJoin, from, Observable, Subscriber } from "rxjs";
 import { environment } from "~environments/environment";
 import { getTime } from 'date-fns';
+import { DEFAULT_SORT_FIELD, PAGINATION_FIELD } from "@enums";
 
 @Injectable({
   providedIn: 'root'
@@ -189,62 +195,110 @@ export class FirebaseService {
     });
   }
 
-  searchDocument<T extends IBaseItemFromFirebase>(collectionName: string, searchField: IFirestoreSearchDocument): Observable<Array<T>> {
-    return searchField.value ? this.searchDocumentWithField<T>(collectionName, searchField) : this.getCollection<T>(collectionName);
-  }
+  // searchDocument<T extends IBaseItemFromFirebase>(collectionName: string, payload: Record<string, any>): Observable<Array<T>> {
+  //   return Object.keys(payload).length ? this.searchDocumentWithField<T>(collectionName, payload) : this.getCollection<T>(collectionName);
+  // }
 
-  searchDocumentWithField<T extends IBaseItemFromFirebase>(collectionName: string, searchField: IFirestoreSearchDocument): Observable<Array<T>> {
-    return new Observable<Array<T>>((subs: Subscriber<Array<T>>) => {
+  countCollection(collectionName: string): Observable<number> {
+    return new Observable<number>((subs: Subscriber<number>) => {
       try {
         if (!this.store) {
           this.initFireStore();
         }
 
         const _ref = collection(this.store as any, collectionName);
-        const _query = query(_ref);
         const _userSnap = from(getDocs(_ref));
-
         _userSnap.subscribe({
           next: resp => {
-            let _data: Array<T> = [];
-
-            if (!resp.empty) {
-              resp.forEach((doc) => {
-                const _docdata: T = {
-                  ...doc.data() as T,
-                  firebaseID: doc.id
-                };
-                _data.push(_docdata);
-              });
-            }
-            _data = _data.filter((elm: any) => {
-              let returnValue: boolean = false;
-              const valueType = typeof elm[searchField.field];
-              switch (valueType) {
-                case 'string':
-                  returnValue = elm[searchField.field].includes(searchField.value);
-                  break;
-
-                default:
-                  returnValue = elm[searchField.field] === searchField.value;
-                  break;
-              }
-
-              return returnValue;
-            });
-
-            subs.next(_data);
+            subs.next(resp.size);
             subs.complete();
           },
           error: error => {
             console.error(error);
-            subs.next([]);
+            subs.next(0);
+            subs.complete();
+          }
+        })
+      } catch (error) {
+        console.error(error);
+        subs.next(0);
+        subs.complete();
+      }
+    });
+  }
+
+  searchDocumentWithField<T extends IBaseItemFromFirebase>(collectionName: string, payload: Record<string, any>): Observable<ISearchDocumentWithField<T>> {
+    return new Observable<ISearchDocumentWithField<T>>((subs: Subscriber<ISearchDocumentWithField<T>>) => {
+      try {
+        if (!this.store) {
+          this.initFireStore();
+        }
+
+        // const _startAt = payload['pageNumber'] * payload['pageSize'];
+        // const _limit = payload['pageSize'];
+        const _ref = collection(this.store as any, collectionName);
+        const _query = query(
+          _ref,
+          where('deletedAt', '==', null),
+          orderBy(DEFAULT_SORT_FIELD),
+          // startAt(_startAt),
+          // limit(_limit),
+        );
+        const _userSnap = from(getDocs(_query));
+        const request: Array<Observable<any>> = [_userSnap, this.countCollection(collectionName)];
+
+
+        forkJoin(request).subscribe({
+          next: resp => {
+            const dataResp = resp[0];
+            const countResp = resp[1];
+            let _data: Array<T> = [];
+            if (dataResp) {
+              if (!dataResp.empty) {
+                dataResp.forEach((doc: any) => {
+                  const _docdata: T = {
+                    ...doc.data() as T,
+                    firebaseID: doc.id
+                  };
+                  _data.push(_docdata);
+                });
+              }
+
+              const searchField = this.getSearchField(payload);
+              _data = _data.filter((elm: any) => {
+                let returnValue: boolean = true;
+                for (const field in searchField) {
+                  const elmValue = elm[field].toString().toLowerCase();
+                  const compareValue = searchField[field].toString().toLowerCase();
+
+                  returnValue = returnValue && (elmValue.includes(compareValue) || compareValue.includes(elmValue));
+                }
+
+                return returnValue;
+              });
+            }
+
+            subs.next({
+              data: _data,
+              totalElements: countResp,
+            });
+            subs.complete();
+          },
+          error: error => {
+            console.error(error);
+            subs.next({
+              data: [],
+              totalElements: 0,
+            });
             subs.complete();
           },
         });
       } catch (error) {
         console.error(error);
-        subs.next([]);
+        subs.next({
+          data: [],
+          totalElements: 0,
+        });
         subs.complete();
       }
     });
@@ -299,5 +353,15 @@ export class FirebaseService {
       _requests.push(this.updateDocument(collectionName, _id, _deletedData));
     })
     return forkJoin(_requests);
+  }
+
+  private getSearchField(payload: Record<string, any>): Record<string, any> {
+    const searchField: Record<string, any> = {};
+    for (const field in payload) {
+      if (!PAGINATION_FIELD.includes(field)) {
+        searchField[field] = payload[field];
+      }
+    }
+    return searchField;
   }
 }

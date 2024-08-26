@@ -1,25 +1,35 @@
 import { CommonModule } from '@angular/common';
 import { Component, ElementRef, OnDestroy, OnInit, signal, ViewChild } from '@angular/core';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTableModule } from '@angular/material/table';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatSelectModule } from '@angular/material/select';
+import { MatTableModule } from '@angular/material/table';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { Router } from '@angular/router';
 import { AddProductComponent, ReviewDeleteProductComponent, TableLayoutComponent } from '@components';
-import { FIRESTORE_COLLECTION } from '@enums';
+import { MinWidthDirective } from '@directives';
+import { FIRESTORE_COLLECTION, PRODUCT_CATEGORY } from '@enums';
+import { Helpers } from '@helpers';
 import {
-  IPagination,
+  ICategory,
+  IGroupTypeByCategory,
   IProduct,
   IProductFromFirebase,
   ITableElement,
   ITableLayout,
-  PRODUCT_FIELD,
+  IType,
+  PRODUCT_FIELD
 } from '@interfaces';
+import { ProductModel } from '@models';
 import { DateTimePipe } from '@pipes';
 import { FirebaseService } from '@services';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatPaginatorModule } from '@angular/material/paginator';
-import { MinWidthDirective } from '@directives';
+import { BehaviorSubject, debounceTime } from 'rxjs';
 
 @Component({
   standalone: true,
@@ -38,6 +48,10 @@ import { MinWidthDirective } from '@directives';
     MatTableModule,
     MatCheckboxModule,
     MatPaginatorModule,
+    MatInputModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatTooltipModule,
   ],
 })
 export class ProductsComponent implements OnInit, OnDestroy {
@@ -47,21 +61,24 @@ export class ProductsComponent implements OnInit, OnDestroy {
     getProducts: signal(false),
     addProduct: signal(false),
     updateProduct: signal(false),
+    getCategory: signal(false),
+    getType: signal(false),
   };
   disable = {
     delete: signal(true),
   };
-  tableSetting: ITableLayout = { };
-  pagination: IPagination = {
-    pageNumber: 0,
-    pageSize: 10,
-    totalPages: 0,
-    totalElements: 0
+  tableSetting: ITableLayout = {
+    showDefaultBtn: true,
   };
-  pageSizeOption: Array<number> = [10, 20, 30, 50, 100];
+  params: ProductModel = new ProductModel(null);
 
+  pageSizeOption: Array<number> = [10, 20, 30, 50, 100];
   productData: Array<IProductFromFirebase> = [];
   productSelected: Array<IProductFromFirebase> = [];
+  categorys: Array<ICategory> = [];
+  rawTypes: Array<IType> = [];
+  types: Array<IGroupTypeByCategory> = [];
+  typesForSelect: Array<IType> = [];
   tableHeaders: Array<ITableElement<PRODUCT_FIELD>> = [
     {
       field: 'select',
@@ -72,6 +89,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
     {
       field: 'name',
       title: 'Product Name',
+      fieldType: 'view',
       width: '150',
     },
     {
@@ -134,15 +152,22 @@ export class ProductsComponent implements OnInit, OnDestroy {
   visibleAddProduct: boolean = false;
   addProductDialogRef!: MatDialogRef<AddProductComponent>;
   deleteProductDialogRef!: MatDialogRef<ReviewDeleteProductComponent>;
+  listenChangeProductNameFilter$: BehaviorSubject<string> = new BehaviorSubject('');
 
   constructor(
     private dialogService: MatDialog,
-    private firebaseService: FirebaseService
+    private firebaseService: FirebaseService,
+    private router: Router,
   ) {}
 
   //#region life circle
   ngOnInit() {
-    this.getProducts();
+    this.parseParams();
+    this.initData();
+
+    this.listenChangeProductNameFilter$.pipe(debounceTime(300)).subscribe(resp => {
+      this.onChangeFilter();
+    });
   }
 
   ngOnDestroy(): void {}
@@ -151,10 +176,14 @@ export class ProductsComponent implements OnInit, OnDestroy {
   //#region firebase
   getProducts() {
     this.loading.getProducts.set(true);
+    const _payload = {
+      ...this.params.getAPIParams,
+    };
     this.firebaseService
-      .getCollection<IProduct>(FIRESTORE_COLLECTION.PRODUCTS)
+      .searchDocumentWithField<IProduct>(FIRESTORE_COLLECTION.PRODUCTS, _payload)
       .subscribe((resp) => {
-        this.productData = resp.map((prod) => {
+        const data = resp.data;
+        this.productData = data.map((prod) => {
           return {
             ...prod,
             select: false,
@@ -163,9 +192,29 @@ export class ProductsComponent implements OnInit, OnDestroy {
         this.checkProductSelected();
         this.checkAllSelect();
         this.checkDisableDelete();
-        this.pagination.totalElements = this.productData.length;
+        this.params.totalElements = resp.totalElements;
+        this.changeUrl(false);
         this.loading.getProducts.set(false);
       });
+  }
+
+  getProductCatrgory() {
+    this.firebaseService.getCollection<ICategory>(FIRESTORE_COLLECTION.CATEGORYS, false).subscribe(resp => {
+      this.categorys = resp;
+      this.loading.getCategory.set(true);
+    });
+  }
+
+  getProductType() {
+    this.firebaseService.getCollection<IType>(FIRESTORE_COLLECTION.TYPES, false).subscribe(resp => {
+      this.rawTypes = resp;
+      this.types = this.cookingTypeByCategory(resp);
+
+      if (this.params.category) {
+        this.onChangeCategory(this.params.category as any);
+      }
+      this.loading.getType.set(true);
+    });
   }
 
   createNewProduct(data: IProduct) {
@@ -204,6 +253,80 @@ export class ProductsComponent implements OnInit, OnDestroy {
   //#endregion
 
   //#region local func
+  initData() {
+    this.getProductCatrgory();
+    this.getProductType();
+  }
+
+  onChangeProductName(value: string) {
+    this.listenChangeProductNameFilter$.next(value);
+  }
+
+  onChangeCategory(category: PRODUCT_CATEGORY) {
+    this.typesForSelect = this.types.find(type => type.category === category)?.types ?? [];
+    this.onChangeFilter();
+  }
+
+  onClearFilter(filter: 'name' | 'category' | 'type', evt: Event) {
+    evt.stopPropagation();
+    this.params[filter] = '';
+
+    if (filter === 'category') {
+      this.params.type = '';
+    }
+    this.onChangeFilter();
+  }
+
+  onChangeFilter() {
+    this.params.pageNumber = 0;
+    this.changeUrl();
+  }
+
+  onRefresh() {
+    this.changeUrl();
+  }
+
+  onReset() {
+    this.params.name = '';
+    this.params.category = '';
+    this.params.type = '';
+    this.changeUrl();
+  }
+
+  parseParams() {
+    const object = Helpers.convertParamsToObject(Helpers.getParamString());
+    // parse params to model
+    this.params = new ProductModel(object);
+    this.changeUrl(false);
+  }
+
+  changeUrl(getData: boolean = true) {
+    this.params = new ProductModel(this.params);
+    const _params = this.params.getURLParams;
+    this.router.navigate([], {
+      queryParams: _params,
+      queryParamsHandling: 'merge',
+    });
+    if (getData) this.getProducts();
+  }
+
+  cookingTypeByCategory(data: Array<IType>): Array<IGroupTypeByCategory> {
+    const returnData: Array<IGroupTypeByCategory> = [];
+
+    data.forEach(prod => {
+      const existIndex = returnData.findIndex(retProd => retProd.category === prod.category);
+      if (existIndex > -1) {
+        returnData[existIndex].types.push(prod);
+      } else {
+        returnData.push({
+          category: prod.category,
+          types: [prod],
+        })
+      }
+    });
+    return returnData;
+  }
+
   onClickSelectProduct(select: boolean, product: IProductFromFirebase) {
     if (select) {
       this.productSelected.push(product);
@@ -270,8 +393,10 @@ export class ProductsComponent implements OnInit, OnDestroy {
     this.onOpenDeleteProductDialog(selectedProducts);
   }
 
-  onChangePagination(data: any) {
-    console.log(data);
+  onChangePagination(pag: PageEvent) {
+    this.params.pageNumber = pag.pageIndex;
+    this.params.pageSize = pag.pageSize;
+    this.changeUrl();
   }
   //#endregion
 
@@ -280,7 +405,11 @@ export class ProductsComponent implements OnInit, OnDestroy {
     this.addProductDialogRef = this.dialogService.open(AddProductComponent, {
       data: {
         product: product,
+        categorys: this.categorys,
+        types: this.types,
+        isView: action === 'VIEW',
       },
+      autoFocus: false,
     });
 
     this.addProductDialogRef.componentInstance.formValueChange.subscribe(
@@ -311,6 +440,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
       data: {
         products: products,
       },
+      autoFocus: false,
     });
 
     this.deleteProductDialogRef.componentInstance.deleteProducts.subscribe(

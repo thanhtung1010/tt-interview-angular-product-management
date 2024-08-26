@@ -4,3 +4,5 @@ export const FIRESTORE_COLLECTION = {
   CATEGORYS: "CATEGORYS",
   TYPES: "TYPES",
 };
+
+export const DEFAULT_SORT_FIELD = 'updatedAt'

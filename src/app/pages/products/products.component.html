@@ -1,12 +1,53 @@
-<tt-table-layout [loading]="loading.getProducts">
+<tt-table-layout [loading]="loading.getProducts" [tableSetting]="tableSetting" (reset)="onReset()" (refresh)="onRefresh()">
+  <!-- #region filter -->
+  <ng-container filter>
+    <div class="tt-pl-fi">
+      <label class="tt-label text-sm">Search Product Name</label>
+      <mat-form-field appearance="outline">
+        <input matInput [(ngModel)]="params.name" placeholder="Enter Product Name" (ngModelChange)="onChangeProductName($event)" />
+        <button mat-icon-button matSuffix matTooltip="Clear" matTooltipPosition="above" (click)="onClearFilter('name', $event)">
+          <mat-icon aria-hidden="false" aria-label="Cancel" fontIcon="cancel"></mat-icon>
+        </button>
+      </mat-form-field>
+    </div>
+
+    <div class="tt-pl-fi">
+      <label class="tt-label text-sm">Product Category</label>
+      <mat-form-field appearance="outline">
+        <mat-select [(ngModel)]="params.category" (ngModelChange)="onChangeCategory($event)" placeholder="Select Category">
+          <ng-container *ngFor="let category of categorys">
+            <mat-option [value]="category.code">{{category.label}}</mat-option>
+          </ng-container>
+        </mat-select>
+        <button mat-icon-button matSuffix matTooltip="Clear" matTooltipPosition="above" (click)="onClearFilter('category', $event)">
+          <mat-icon aria-hidden="false" aria-label="Cancel" fontIcon="cancel"></mat-icon>
+        </button>
+      </mat-form-field>
+    </div>
+
+    <div class="tt-pl-fi" [ngClass]="{'tt-disabled': !params.category}">
+      <label class="tt-label text-sm">Product Type</label>
+        <mat-form-field appearance="outline">
+        <mat-select [(ngModel)]="params.type" (ngModelChange)="onChangeFilter()" placeholder="Select Type">
+          <ng-container *ngFor="let type of typesForSelect">
+            <mat-option [value]="type.code">{{type.label}}</mat-option>
+          </ng-container>
+        </mat-select>
+        <button mat-icon-button matSuffix matTooltip="Clear" matTooltipPosition="above" (click)="onClearFilter('type', $event)">
+          <mat-icon aria-hidden="false" aria-label="Cancel" fontIcon="cancel"></mat-icon>
+        </button>
+      </mat-form-field>
+    </div>
+  </ng-container>
   <ng-container filter-right>
-    <button mat-icon-button (click)="onClickAddProduct()">
+    <button mat-icon-button (click)="onClickAddProduct()" matTooltip="Add Product" matTooltipPosition="above">
       <mat-icon aria-hidden="false" aria-label="Add Circle" fontIcon="add_circle"></mat-icon>
     </button>
   </ng-container>
+
   <!-- #region table -->
   <ng-container table>
-    <table mat-table [dataSource]="productData">
+    <table mat-table [dataSource]="productData" mat-virtual-scroll>
 
       <ng-container *ngFor="let header of tableHeaders">
         <ng-container [matColumnDef]="header.field">
@@ -24,6 +65,10 @@
 
           <td mat-cell *matCellDef="let element">
             <ng-container [ngSwitch]="header.fieldType">
+              <ng-container *ngSwitchCase="'view'">
+                <span class="underline text-sky-600 cursor-pointer" (click)="onOpenAddProductDialog('VIEW', element)">{{element[header.field]}}</span>
+              </ng-container>
+
               <ng-container *ngSwitchCase="'dateTime'">
                 {{element[header.field] | DateTimePipe}}
               </ng-container>
@@ -53,10 +98,10 @@
   <!-- #endregion -->
 
   <!-- #region footer -->
-  <ng-container pagination>
-    <mat-paginator [length]="pagination.totalElements" [pageSize]="pagination.pageSize" [pageIndex]="pagination.pageNumber"
+  <!-- <ng-container pagination>
+    <mat-paginator [length]="params.totalElements" [pageSize]="params.pageSize" [pageIndex]="params.pageNumber"
       [pageSizeOptions]="pageSizeOption" aria-label="Select page" (page)="onChangePagination($event)"></mat-paginator>
-  </ng-container>
+  </ng-container> -->
   <ng-container button-right-ft>
     <button [ngClass]="{'tt-disabled': disable.delete()}" class="tt-btn-war" mat-flat-button (click)="onClickDeleteProduct()">
       Delete

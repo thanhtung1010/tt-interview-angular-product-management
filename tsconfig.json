@@ -45,6 +45,12 @@
       "@directives": [
         "./src/app/directives"
       ],
+      "@models": [
+        "./src/app/models"
+      ],
+      "@helpers": [
+        "./src/app/helpers"
+      ],
       "~environments/*": [
         "./src/environments/*"
       ],

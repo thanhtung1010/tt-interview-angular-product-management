@@ -5,7 +5,6 @@ import {
   ElementRef,
   EventEmitter,
   Inject,
-  Input,
   OnInit,
   Output,
   signal,
@@ -32,7 +31,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSelectModule } from '@angular/material/select';
 import { CurrencyFormatDirective } from '@directives';
 import { FIRESTORE_COLLECTION, FORM_DEFAULT_VALUE, PRODUCT_CATEGORY } from '@enums';
-import { IAddProduct, IProduct, ICategory, IProductFromFirebase, IType, IGroupTypeByCategory } from '@interfaces';
+import { IAddProduct, ICategory, IGroupTypeByCategory, IType } from '@interfaces';
 import { FirebaseService } from '@services';
 
 @Component({
@@ -62,66 +61,45 @@ export class AddProductComponent implements OnInit {
 
   loading = {
     initForm: signal(false),
-    getCategory: signal(false),
-    getType: signal(false),
+    submit: signal(false),
   };
   isReadyFormData = computed(() => {
-    return this.loading.initForm() && this.loading.getCategory() && this.loading.getType();
+    const isReady = this.loading.initForm();
+    return isReady;
   });
   productForm!: FormGroup<IAddProduct>;
   categorys: Array<ICategory> = [];
   types: Array<IGroupTypeByCategory> = [];
   typesForSelect: Array<IType> = [];
+  isView: boolean = false;
 
   constructor(
     @Inject(MAT_DIALOG_DATA) private data: any,
     private fb: FormBuilder,
-    private firebaseService: FirebaseService,
   ) { }
 
   ngOnInit() {
-    this.initForm();
+    this.isView = this.data?.isView ?? false;
     this.initData();
+    this.initForm();
   }
 
   initData() {
-    this.getProductCatrgory();
-    this.getProductType();
-  }
+    if (this.data?.categorys) {
+      this.categorys = this.data.categorys;
+    }
+    if (this.data?.types) {
+      this.types = this.data.types;
+    }
 
-  getProductCatrgory() {
-    this.firebaseService.getCollection<ICategory>(FIRESTORE_COLLECTION.CATEGORYS, false).subscribe(resp => {
-      this.categorys = resp;
-      this.loading.getCategory.set(true);
-    });
-  }
-
-  getProductType() {
-    this.firebaseService.getCollection<IType>(FIRESTORE_COLLECTION.TYPES, false).subscribe(resp => {
-      this.types = this.cookingTypeByCategory(resp);
-      this.loading.getType.set(true);
-    });
+    if (this.data?.product) {
+      const category = this.data.product['category'];
+      this.onChangeCategory(category);
+    }
   }
 
   onChangeCategory(category: PRODUCT_CATEGORY) {
     this.typesForSelect = this.types.find(type => type.category === category)?.types ?? [];
-  }
-
-  cookingTypeByCategory(data: Array<IType>): Array<IGroupTypeByCategory> {
-    const returnData: Array<IGroupTypeByCategory> = [];
-
-    data.forEach(prod => {
-      const existIndex = returnData.findIndex(retProd => retProd.category === prod.category);
-      if (existIndex > -1) {
-        returnData[existIndex].types.push(prod);
-      } else {
-        returnData.push({
-          category: prod.category,
-          types: [prod],
-        })
-      }
-    });
-    return returnData;
   }
 
   initForm() {
@@ -141,6 +119,7 @@ export class AddProductComponent implements OnInit {
   }
 
   submit() {
+    this.loading.submit.set(true);
     const valid = this.productForm.valid;
     if (!valid) {
       const controls: Record<string, any> = this.productForm.controls;
@@ -149,6 +128,7 @@ export class AddProductComponent implements OnInit {
         controls[field]?.markAsDirty();
         controls[field]?.updateValueAndValidity();
       }
+      this.loading.submit.set(false);
     } else {
       let value: Record<string, any> = this.productForm.value;
       if (this.data?.product) {

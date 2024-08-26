@@ -4,7 +4,7 @@
       flex
       justify-between
       gap-[10px]
-      p-[5px]
+      p-[10px]
   }
 
   &-ftr {
@@ -20,7 +20,7 @@
     @apply
       flex
       flex-wrap
-      gap-[5px]
+      gap-[10px]
       basis-[90%]
   }
 
@@ -29,9 +29,11 @@
     @apply
       flex
       justify-between
-      absolute
+      sticky
       bottom-[8px]
       w-[100%]
+      bg-[var(--white-color)]
+      pt-[10px]
   }
 
   &-brfo {

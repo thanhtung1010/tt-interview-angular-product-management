@@ -2,6 +2,9 @@ import { Component, OnInit, signal, WritableSignal } from '@angular/core';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { HeaderComponent } from "../header/header.component";
 import { MenuService } from '@services';
+import {MatDividerModule} from '@angular/material/divider';
+import {MatListModule} from '@angular/material/list';
+
 
 @Component({
   standalone: true,
@@ -9,7 +12,9 @@ import { MenuService } from '@services';
   templateUrl: './page-layout.component.html',
   imports: [
     MatSidenavModule,
-    HeaderComponent
+    HeaderComponent,
+    MatListModule,
+    MatDividerModule,
   ],
 })
 export class PageLayoutComponent implements OnInit {

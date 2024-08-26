@@ -8,14 +8,14 @@ export interface IFirebaseConfig {
   measurementId: string;
 }
 
-export interface IFirestoreSearchDocument {
-  field: string;
-  value: any
-}
-
 export interface IBaseItemFromFirebase {
   createdAt?: number | null;
   updatedAt?: number | null;
   deletedAt?: number | null;
   [key: string]: any;
+}
+
+export interface ISearchDocumentWithField<T> {
+  data: Array<T>;
+  totalElements: number;
 }

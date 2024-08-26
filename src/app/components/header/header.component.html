@@ -5,10 +5,13 @@
     </button>
     <span>CMS</span>
     <span class="flex-auto"></span>
-    <button mat-icon-button class="favorite-icon" aria-label="Example icon-button with heart icon">
+    <a mat-icon-button class="favorite-icon" aria-label="Example icon-button with heart icon"
+      target="_self" matTooltip="trinhthanhtung1010@gmail.com" matTooltipPosition="above"
+      href="mailto:trinhthanhtung1010@gmail.com?Subject=New%20Friend&body=Hi!%20I%20saw%20you%20on%20your%20portfolio.">
       <mat-icon aria-hidden="false" aria-label="Chat" fontIcon="chat"></mat-icon>
-    </button>
-    <button mat-icon-button aria-label="Example icon-button with share icon">
+    </a>
+    <button mat-icon-button aria-label="Example icon-button with share icon" matTooltip="Social Network" matTooltipPosition="above"
+      (click)="onOpenAddProductDialog()">
       <mat-icon aria-hidden="false" aria-label="Group Add" fontIcon="group_add"></mat-icon>
     </button>
   </mat-toolbar>

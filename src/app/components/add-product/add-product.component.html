@@ -1,6 +1,6 @@
 <h2 mat-dialog-title>Add Product</h2>
 <mat-dialog-content class="relative ">
-  <form class="tt-ap-form" [formGroup]="productForm">
+  <form class="tt-ap-form" [formGroup]="productForm" [ngClass]="{'tt-disabled': isView || !isReadyFormData() || loading.submit()}">
     <!-- region name -->
     <ng-container *ngIf="productForm.contains('name')">
       <mat-form-field class="tt-ap-fi">
@@ -63,7 +63,7 @@
     </ng-container>
   </form>
 
-  <ng-container *ngIf="!isReadyFormData()">
+  <ng-container *ngIf="!isReadyFormData() || loading.submit()">
     <div class="tt-tl-ld">
       <div class="tt-tl-bgld">
       </div>
@@ -73,5 +73,7 @@
 </mat-dialog-content>
 <mat-dialog-actions [align]="'end'">
   <button mat-button (click)="onCloseDialog()">Cancel</button>
-  <button [disabled]="productForm.invalid" mat-button cdkFocusInitial (click)="submit()">Ok</button>
+  <ng-container *ngIf="!isView">
+    <button [disabled]="productForm.invalid" mat-button cdkFocusInitial (click)="submit()">Ok</button>
+  </ng-container>
 </mat-dialog-actions>

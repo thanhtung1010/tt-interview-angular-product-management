@@ -2,7 +2,13 @@
 <!-- content -->
 <main class="tt-pl">
   <mat-drawer-container class="!bg-transparent flex rounded-[8px]">
-    <mat-drawer class="tt-pl-sb" mode="over" [opened]="visileMenu()">Sidenav content</mat-drawer>
+    <mat-drawer class="tt-pl-sb" mode="over" [opened]="visileMenu()">
+      <mat-list>
+        <mat-list-item>
+          <a href="/products">Product</a>
+        </mat-list-item>
+      </mat-list>
+    </mat-drawer>
     <mat-drawer-content class="tt-pl-ct">
       <ng-content select="[content]"></ng-content>
     </mat-drawer-content>

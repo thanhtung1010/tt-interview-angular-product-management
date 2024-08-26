@@ -17,15 +17,15 @@
 }
 
 &-disabled {
-  opacity: 0.32;
+  opacity: 0.5;
   pointer-events: none;
   -webkit-user-select: none;
   user-select: none;
   filter: grayscale(0.9);
   box-shadow: none;
 
-  &-can-hover {
-    pointer-events: all;
+  * {
+    pointer-events: none !important;
   }
 }
 
@@ -49,6 +49,7 @@
   color: #{$mainTextColor};
   // margin-left: 10px;
   margin-bottom: 5px;
+  margin-left: 5px;
   display: block;
   text-align: left;
   justify-content: flex-start;

@@ -5,9 +5,17 @@
       <ng-content select="[filter]"></ng-content>
     </section>
     <section class="tt-tl-ftr">
-      <ng-container *ngIf="tableSetting?.showSearch ?? true">
-        <button mat-icon-button class="favorite-icon" aria-label="Example icon-button with heart icon">
-          <mat-icon aria-hidden="false" aria-label="Search" fontIcon="search"></mat-icon>
+      <ng-container *ngIf="tableSetting?.showSearch">
+        <button mat-icon-button class="favorite-icon" aria-label="Example icon-button with heart icon" (click)="onClickSearch()">
+          <mat-icon aria-hidden="false" matTooltip="Search" matTooltipPosition="above" aria-label="Search" fontIcon="search"></mat-icon>
+        </button>
+      </ng-container>
+      <ng-container *ngIf="tableSetting?.showDefaultBtn">
+        <button mat-icon-button class="favorite-icon" aria-label="Example icon-button with heart icon" (click)="onClickReset()">
+          <mat-icon aria-hidden="false" matTooltip="Reset" matTooltipPosition="above" aria-label="Reset" fontIcon="search_off"></mat-icon>
+        </button>
+        <button mat-icon-button class="favorite-icon" aria-label="Example icon-button with heart icon" (click)="onClickRefresh()">
+          <mat-icon aria-hidden="false" matTooltip="Refresh" matTooltipPosition="above" aria-label="Refresh" fontIcon="refresh"></mat-icon>
         </button>
       </ng-container>
       <ng-content select="[filter-right]"></ng-content>

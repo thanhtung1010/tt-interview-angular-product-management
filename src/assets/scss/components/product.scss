@@ -14,3 +14,12 @@
       flex-[50%]
   }
 }
+
+&-pl {
+  &-fi {
+    @apply
+      flex
+      flex-col
+      gap-[5px]
+  }
+}
