@@ -1,10 +1,21 @@
-# TtInterviewAngularProductManagement
+# Products Management
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 18.2.1.
+## Project Setup
+
+This project was generated with [Angular CLI](https://github.com/angular/angular-cli) (version 18.2.1) and requires [NodeJS](https://nodejs.org/en) (version 20.15.1 or later).
+
+## Backend as a Service (BaaS)
+
+This project leverages Firebase for its backend functionality. Your Firebase configuration is stored in the `environment.ts` file. Feel free to replace it with your own configuration.
+
+## Sorting Tables
+
+Server-side sorting is implemented using Firebase. To enable sorting by a specific column, you'll need to create an index in your Firebase project for the corresponding field used in the `orderBy` function.
 
 ## Development server
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:8080/`. The application will automatically reload if you change any of the source files.
+Run `npm i` before run start command.
+Run `ng serve` or `npm start` for a dev server. Navigate to `http://localhost:8080/`. The application will automatically reload if you change any of the source files.
 
 ## Code scaffolding
 
@@ -13,14 +24,6 @@ Run `ng generate component component-name` to generate a new component. You can 
 ## Build
 
 Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
-
-## Running unit tests
-
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
 
 ## Further help
 
