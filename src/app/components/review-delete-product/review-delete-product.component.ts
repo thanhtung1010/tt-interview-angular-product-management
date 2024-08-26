@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, EventEmitter, Inject, OnInit, Output } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Inject, OnInit, Output, signal } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogActions, MatDialogClose, MatDialogContent, MatDialogTitle } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatTableModule } from '@angular/material/table';
 import { IProductFromFirebase, ITableElement, PRODUCT_FIELD } from '@interfaces';
 import { DateTimePipe } from '@pipes';
@@ -24,12 +25,16 @@ import { DateTimePipe } from '@pipes';
     MatDialogContent,
     MatDialogActions,
     MatDialogClose,
+    MatProgressBarModule,
   ]
 })
 export class ReviewDeleteProductComponent implements OnInit {
   @Output() deleteProducts: EventEmitter<Array<IProductFromFirebase>> = new EventEmitter();
   @Output() closeDialog = new EventEmitter();
 
+  loading = {
+    submit: signal(false),
+  };
   tableHeaders: Array<ITableElement<PRODUCT_FIELD>> = [
     {
       field: 'name',
@@ -110,6 +115,7 @@ export class ReviewDeleteProductComponent implements OnInit {
   }
 
   submit() {
+    this.loading.submit.set(true);
     this.deleteProducts.emit(this.products);
   }
 

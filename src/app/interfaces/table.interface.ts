@@ -25,7 +25,8 @@ export interface ITableElement<T> {
   notAllowHide?: boolean;
   showCCOrAdmin?: boolean;
   showBum?: boolean;
-  sortOrder?: string;
+  sortOrder?: null | 'asc' | 'desc';
+  showSort?: boolean;
   isHide?: boolean;
   nzLeft?: boolean;
   nzRight?: boolean;

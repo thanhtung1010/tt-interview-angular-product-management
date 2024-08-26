@@ -33,6 +33,13 @@
     <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
   </table>
 
+  <ng-container *ngIf="loading.submit()">
+    <div class="tt-tl-ld">
+      <div class="tt-tl-bgld">
+      </div>
+      <mat-progress-bar mode="query"></mat-progress-bar>
+    </div>
+  </ng-container>
 </mat-dialog-content>
 <mat-dialog-actions [align]="'end'">
   <button mat-button (click)="onCloseDialog()">Cancel</button>

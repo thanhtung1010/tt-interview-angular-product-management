@@ -12,9 +12,9 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Router } from '@angular/router';
-import { AddProductComponent, ReviewDeleteProductComponent, TableLayoutComponent } from '@components';
+import { AddProductComponent, ReviewDeleteProductComponent, SortHeaderComponent, TableLayoutComponent } from '@components';
 import { MinWidthDirective } from '@directives';
-import { FIRESTORE_COLLECTION, PRODUCT_CATEGORY } from '@enums';
+import { DEFAULT_SORT_FIELD, FIRESTORE_COLLECTION, PRODUCT_CATEGORY } from '@enums';
 import { Helpers } from '@helpers';
 import {
   ICategory,
@@ -41,6 +41,7 @@ import { BehaviorSubject, debounceTime } from 'rxjs';
     CommonModule,
     TableLayoutComponent,
     AddProductComponent,
+    SortHeaderComponent,
     DateTimePipe,
     MinWidthDirective,
     MatButtonModule,
@@ -66,6 +67,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
   };
   disable = {
     delete: signal(true),
+    action: signal(false),
   };
   tableSetting: ITableLayout = {
     showDefaultBtn: true,
@@ -84,56 +86,76 @@ export class ProductsComponent implements OnInit, OnDestroy {
       field: 'select',
       title: '',
       fieldType: 'select',
-      width: '50',
+      width: '70',
+      showSort: false,
+      sortOrder: null,
     },
     {
       field: 'name',
       title: 'Product Name',
       fieldType: 'view',
-      width: '150',
+      width: '170',
+      showSort: false,
+      sortOrder: null,
     },
     {
       field: 'category',
       title: 'Category',
-      width: '100',
+      width: '120',
+      showSort: false,
+      sortOrder: null,
     },
     {
       field: 'type',
       title: 'Product Type',
-      width: '120',
+      width: '140',
+      showSort: false,
+      sortOrder: null,
     },
     {
       field: 'price',
       title: 'Price',
-      width: '100',
+      width: '120',
+      showSort: false,
+      sortOrder: null,
     },
     {
       field: 'detail',
       title: 'Detail',
-      width: '150',
+      width: '170',
+      showSort: false,
+      sortOrder: null,
     },
     {
       field: 'img',
       title: 'Product Image',
-      width: '150',
+      width: '170',
+      showSort: false,
+      sortOrder: null,
     },
     {
       field: 'createdAt',
       title: 'Created At',
       fieldType: 'dateTime',
-      width: '100',
+      width: '120',
+      showSort: true,
+      sortOrder: null,
     },
     {
       field: 'updatedAt',
       title: 'Last Updated At',
       fieldType: 'dateTime',
-      width: '150',
+      width: '170',
+      showSort: true,
+      sortOrder: 'asc',
     },
     {
       field: 'action',
       title: '',
       fieldType: 'action',
-      width: '70',
+      width: '90',
+      showSort: false,
+      sortOrder: null,
     },
   ];
   displayedColumns: Array<PRODUCT_FIELD> = [
@@ -195,6 +217,7 @@ export class ProductsComponent implements OnInit, OnDestroy {
         this.params.totalElements = resp.totalElements;
         this.changeUrl(false);
         this.loading.getProducts.set(false);
+        this.disable.action.set(!this.productData.length);
       });
   }
 
@@ -460,6 +483,43 @@ export class ProductsComponent implements OnInit, OnDestroy {
     if (reload) {
       this.getProducts();
     }
+  }
+  //#endregion
+
+  //#region sort
+  onClickSortHeader(index: number, header: ITableElement<PRODUCT_FIELD>) {
+    if (header.sortOrder === null) {
+      this.tableHeaders = this.tableHeaders.map((head, _index) => {
+        if (head.field === DEFAULT_SORT_FIELD) {
+          head.sortOrder = 'asc';
+        } else {
+          head.sortOrder = null;
+        }
+
+        return head;
+      });
+    } else {
+      this.tableHeaders = this.tableHeaders.map((head, _index) => {
+        if (_index !== index) {
+          head.sortOrder = null;
+        }
+
+        return head;
+      });
+    }
+
+    this.parseSortHeader(header);
+  }
+
+  parseSortHeader(header: ITableElement<PRODUCT_FIELD>) {
+    let _value: string = header.field;
+    if (header.sortOrder === null) {
+      _value = DEFAULT_SORT_FIELD;
+    }
+
+    this.params.sort = _value;
+    this.params.direction = header.sortOrder ?? null;
+    this.changeUrl();
   }
   //#endregion
 }

@@ -1,0 +1,16 @@
+
+<div [class]="'tt-ap-hd-ct ' + (header.sortOrder === null ? '' : 'tt-ap-hd-' + header.sortOrder)" (click)="onClickHeader()">
+  <div [class]="'tt-ap-hd-ct-tx' + (header.showSort ? '' : ' tt-ap-hd-ct-tx-ns') + ' tt-align-' + header.align">
+    {{ header.title }}
+  </div>
+  <ng-container *ngIf="header.showSort">
+    <div class="tt-sr-hd tt-ap-hd-ct-ic">
+      <svg class="up" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M11.9562 3.08422L19.6457 15.3874C20.6059 16.9239 19.5014 18.9169 17.6895 18.9169H2.31054C0.49865 18.9169 -0.605959 16.9239 0.354334 15.3874L8.04381 3.08422C8.94733 1.63859 11.0527 1.63859 11.9562 3.08422Z" fill="#7A7A7A"/>
+      </svg>
+      <svg class="down" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M8.0438 17.8326L0.354331 5.52947C-0.605961 3.993 0.498662 2 2.31053 2H17.6895C19.5013 2 20.606 3.993 19.6457 5.52947L11.9562 17.8326C11.0527 19.2782 8.94732 19.2782 8.0438 17.8326Z" fill="#7A7A7A"/>
+      </svg>
+    </div>
+  </ng-container>
+</div>

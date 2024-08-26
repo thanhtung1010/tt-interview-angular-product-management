@@ -26,9 +26,7 @@ export class HeaderComponent implements OnInit {
     private dialogService: MatDialog,
   ) { }
 
-  ngOnInit() {
-    this.onOpenAddProductDialog()
-  }
+  ngOnInit() { }
 
   onOpenAddProductDialog() {
     this.dialogRef = this.dialogService.open(SocialNetworkComponent, {

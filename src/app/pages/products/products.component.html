@@ -49,16 +49,19 @@
   <ng-container table>
     <table mat-table [dataSource]="productData" mat-virtual-scroll>
 
-      <ng-container *ngFor="let header of tableHeaders">
+      <ng-container *ngFor="let header of tableHeaders;let index = index;">
         <ng-container [matColumnDef]="header.field">
-          <th mat-header-cell *matHeaderCellDef [style]="'--mat-mdc-header-cell:' + (header?.width ? (header.width + 'px;') : 'auto;')">
+          <th mat-header-cell *matHeaderCellDef [style]="'--mat-mdc-header-cell:' + (header?.width ? (header.width + 'px;') : 'auto;')"
+            class="tt-ap-hd">
             <ng-container [ngSwitch]="header.fieldType">
               <ng-container *ngSwitchCase="'select'">
-                <mat-checkbox class="example-margin" [(ngModel)]="checkAll" (ngModelChange)="onClickSelectAll($event)"></mat-checkbox>
+                <ng-container *ngIf="!disable.action()">
+                  <mat-checkbox class="example-margin" [(ngModel)]="checkAll" (ngModelChange)="onClickSelectAll($event)"></mat-checkbox>
+                </ng-container>
               </ng-container>
 
               <ng-container *ngSwitchDefault>
-                {{header.title}}
+                <tt-sort-header [header]="header" (headerChange)="onClickSortHeader(index, $event)"></tt-sort-header>
               </ng-container>
             </ng-container>
           </th>

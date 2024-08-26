@@ -29,7 +29,7 @@ import {
 import { forkJoin, from, Observable, Subscriber } from "rxjs";
 import { environment } from "~environments/environment";
 import { getTime } from 'date-fns';
-import { DEFAULT_SORT_FIELD, PAGINATION_FIELD } from "@enums";
+import { DEFAULT_SORT_FIELD, PAGINATION_FIELD, UNFILTER_FIELD } from "@enums";
 
 @Injectable({
   providedIn: 'root'
@@ -154,15 +154,18 @@ export class FirebaseService {
         from(addDoc(_ref, newData)).subscribe({
           next: resp => {
             subs.next(true);
+            subs.complete();
           },
           error: error => {
             console.error(error);
             subs.next(false);
+            subs.complete();
           }
         });
       } catch (error) {
         console.error(error);
         subs.next(false);
+        subs.complete();
       }
     });
   }
@@ -182,15 +185,18 @@ export class FirebaseService {
         from(updateDoc(_ref, updatedData)).subscribe({
           next: resp => {
             subs.next(true);
+            subs.complete();
           },
           error: error => {
             console.error(error);
             subs.next(false);
+            subs.complete();
           }
         });
       } catch (error) {
         console.error(error);
         subs.next(false);
+        subs.complete();
       }
     });
   }
@@ -240,7 +246,7 @@ export class FirebaseService {
         const _query = query(
           _ref,
           where('deletedAt', '==', null),
-          orderBy(DEFAULT_SORT_FIELD),
+          orderBy(payload['sort'], payload['direction']),
           // startAt(_startAt),
           // limit(_limit),
         );
@@ -258,7 +264,7 @@ export class FirebaseService {
                 dataResp.forEach((doc: any) => {
                   const _docdata: T = {
                     ...doc.data() as T,
-                    firebaseID: doc.id
+                    id: doc.id
                   };
                   _data.push(_docdata);
                 });
@@ -341,24 +347,36 @@ export class FirebaseService {
   }
 
   deleteDocument<T extends IBaseItemFromFirebase>(collectionName: string, datas: Array<T>): Observable<boolean[]> {
-    const deletedTime = new Date();
-    const _requests: Array<Observable<boolean>> = [];
-    datas.forEach(elm => {
-      const _id = elm['id'];
-      const _deletedData = {
-        ...elm,
-        deletedAt: getTime(deletedTime),
-        updatedAt: getTime(deletedTime),
-      };
-      _requests.push(this.updateDocument(collectionName, _id, _deletedData));
-    })
-    return forkJoin(_requests);
+    return new Observable<boolean[]>((subs: Subscriber<boolean[]>) => {
+      const deletedTime = new Date();
+      const _requests: Array<Observable<boolean>> = [];
+      datas.forEach(elm => {
+        const _id = elm['id'];
+        const _deletedData = {
+          ...elm,
+          deletedAt: getTime(deletedTime),
+          updatedAt: getTime(deletedTime),
+        };
+        _requests.push(this.updateDocument(collectionName, _id, _deletedData));
+      })
+      forkJoin(_requests).subscribe({
+        next: resp => {
+          subs.next(resp);
+          subs.complete();
+        },
+        error: error => {
+          console.error(error);
+          subs.next([]);
+          subs.complete();
+        },
+      });
+    });
   }
 
   private getSearchField(payload: Record<string, any>): Record<string, any> {
     const searchField: Record<string, any> = {};
     for (const field in payload) {
-      if (!PAGINATION_FIELD.includes(field)) {
+      if (!UNFILTER_FIELD.includes(field)) {
         searchField[field] = payload[field];
       }
     }
